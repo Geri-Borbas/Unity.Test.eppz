@@ -1,0 +1,3 @@
+[submodule "Assets/Plugins/eppz!"]
+	path = Assets/Plugins/eppz!
+	url = https://github.com/eppz/Unity.Library.eppz
