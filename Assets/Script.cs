@@ -7,10 +7,10 @@ namespace Game
 {
 
 
-	using EPPZ.Utils;
+	// using EPPZ.Utils;
 
 
-	[ExecutionOrder(500)]
+	// [EPPZ.Utils.ExecutionOrder(500)]
 	public class Script : MonoBehaviour
 	{
 

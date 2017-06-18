@@ -2,7 +2,7 @@
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
     "version": "0.1.0",
-    "command": "msbuild",
+    "command": "/Applications/Unity/Unity.app/Contents/MonoBleedingEdge/bin/xbuild",
     "args": [
         // Ask msbuild to generate full paths for file names.
         "eppz.sln",
