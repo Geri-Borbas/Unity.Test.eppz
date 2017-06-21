@@ -11,8 +11,8 @@ namespace Game
 	{
 
 
-		#if LIBRARY_IS_AVAILABLE
-		public string message = "LIBRARY_IS_AVAILABLE";
+		#if LIBRARY
+		public string message = "LIBRARY";
 		#endif
 	}
 }
