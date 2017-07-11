@@ -1,22 +1,31 @@
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
-    "version": "0.1.0",
-    "command": "/Applications/Unity/Unity.app/Contents/MonoBleedingEdge/bin/xbuild",
-    "args": [
-        // Ask msbuild to generate full paths for file names.
-        "eppz.sln",
-        "/property:GenerateFullPaths=true"
-    ],
-    "taskSelector": "/t:",
-    "showOutput": "silent",
-    "tasks": [
+    "version": "2.0.0",
+    "tasks":
+    [
         {
-            "taskName": "build",
-            // Show the output window only if unrecognized errors occur.
+            "taskName": "Build",
+            "isBuildCommand": true,
+            "command": "/Applications/Unity/Unity.app/Contents/MonoBleedingEdge/bin/xbuild",
+            "args":
+            [
+                "eppz.sln",
+                "/property:GenerateFullPaths=true"
+            ],
             "showOutput": "silent",
-            // Use the standard MS compiler pattern to detect errors, warnings and infos
             "problemMatcher": "$msCompile"
+        },
+        {
+            "taskName": "Test",
+            "isShellCommand": true,
+            "isTestCommand": true,
+            "command": ".vscode/test.command",
+            "args":
+            [
+                "${workspaceRoot}",
+                "eppz.TestResult.xml"
+            ],
+            // "dependsOn": [ "Build" ],
+            "showOutput": "always"
         }
     ]
 }
