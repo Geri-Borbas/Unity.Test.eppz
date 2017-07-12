@@ -10,11 +10,11 @@ echo "Running Unity.app (batch mode, run tests)..."
 
 time \
 "$UNITY_EXECUTABLE" \
--batchmode -nographics -quit \
 -projectPath "$PROJECT_FOLDER" \
--runTests \
--testResults "$RESULTS_FILEPATH" \
--testPlatform editmode
+-batchmode \
+-runEditorTests \
+-editorTestsResultFile "$RESULTS_FILEPATH" \
+-nographics
 
 echo ""
 echo "Editor log: ~/Library/Logs/Unity/Editor.log"

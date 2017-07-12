@@ -24,7 +24,7 @@
                 "${workspaceRoot}",
                 "eppz.TestResult.xml"
             ],
-            // "dependsOn": [ "Build" ],
+            "dependsOn": [ "Build" ],
             "showOutput": "always"
         }
     ]
