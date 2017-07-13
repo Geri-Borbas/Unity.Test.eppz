@@ -18,7 +18,7 @@
             "taskName": "Test",
             "isShellCommand": true,
             "isTestCommand": true,
-            "command": ".scripts/test.command",
+            "command": ".scripts/test",
             "args":
             [
                 "${workspaceRoot}",

@@ -17,5 +17,12 @@ time \
 -nographics
 
 echo ""
+
+python \
+.scripts/xml-to-yaml.py \
+-x2y \
+"$RESULTS_FILENAME"
+
+echo ""
 echo "Editor log: ~/Library/Logs/Unity/Editor.log"
 echo "Results xml: $RESULTS_FILEPATH"

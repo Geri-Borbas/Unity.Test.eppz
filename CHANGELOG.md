@@ -1,5 +1,11 @@
 # eppz!
 
+* 0.2.5
+
+	+ `.travis.yml`
+		+ Hooked up Unity install
+		+ Added `YAML` output
+
 * 0.2.2 - 0.2.31
 
 	+ `.travis.yml`

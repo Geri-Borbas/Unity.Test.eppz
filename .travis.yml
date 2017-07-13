@@ -1,8 +1,6 @@
 os: osx
 language: generic
-before_install:
-  - python .scripts/install-unity.py --packages
 install:  
   - sudo python .scripts/install-unity.py --package Unity 5.6.2f1
 script:
-  - .scripts/test.command $TRAVIS_BUILD_DIR eppz.TestResult.xml
+  - .scripts/test $TRAVIS_BUILD_DIR eppz.TestResult.xml
