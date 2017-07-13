@@ -2,7 +2,7 @@ language: csharp
 before_install:
   - sudo wget https://github.com/sttz/install-unity/archive/0.0.9.tar.gz --directory-prefix .scripts
   - sudo tar --extract --file .scripts/0.0.9.tar.gz --directory .scripts --strip-components=1
-  - .scripts/install-unity.py --packages
-  - .scripts/install-unity.py --package Unity 5.6.2f1
+  - python .scripts/install-unity.py --packages
+  - python .scripts/install-unity.py --package Unity 5.6.2f1
 script:
   - .scripts/test.command $TRAVIS_BUILD_DIR eppz.TestResult.xml
