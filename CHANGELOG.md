@@ -1,5 +1,10 @@
 # eppz!
 
+* 0.2.6
+
+	+ `.script/test`
+		+ Output test results (JSON)
+
 * 0.2.5
 
 	+ `.travis.yml`

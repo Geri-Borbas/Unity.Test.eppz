@@ -19,9 +19,12 @@ time \
 echo ""
 
 python \
-.scripts/xml-to-yaml.py \
--x2y \
-"$RESULTS_FILENAME"
+.scripts/xml-to-json.py \
+-t xml2json \
+eppz.TestResult.xml \
+--pretty \
+--strip_text \
+| sed -e $'s/"@/"/g'
 
 echo ""
 echo "Editor log: ~/Library/Logs/Unity/Editor.log"
