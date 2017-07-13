@@ -1,3 +1,4 @@
+os: osx
 language: generic
 before_install:
   - sudo brew install python
