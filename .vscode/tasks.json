@@ -18,7 +18,7 @@
             "taskName": "Test",
             "isShellCommand": true,
             "isTestCommand": true,
-            "command": ".vscode/test.command",
+            "command": ".scripts/test.command",
             "args":
             [
                 "${workspaceRoot}",
