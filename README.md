@@ -18,7 +18,7 @@ Having tests running inside Unity, you don't need to install any specific langua
 os: osx
 language: generic
 install:  
-  - sudo python .scripts/install-unity.py --package Unity 5.6.2f1
+  - sudo python .scripts/install-unity.py --package Unity 2017.1.0f3
 script:
   - .scripts/test $TRAVIS_BUILD_DIR eppz.TestResult.xml
 ```
