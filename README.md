@@ -4,9 +4,22 @@ Unity Test project for [**Unity.Library.eppz**](https://github.com/eppz/Unity.Li
 
 ## How it works
 
-Unity can **run editor tests from command line** (see more at [Unity Test Runner](https://docs.unity3d.com/Manual/testing-editortestsrunner.html), and [Command line arguments](https://docs.unity3d.com/Manual/CommandLineArguments.html)), also **can be installed from command line** (see details at [Downloading and installing Unity](https://docs.unity3d.com/Manual/InstallingUnity.html), or even better use [`install-unity`](https://github.com/sttz/install-unity) by [Adrian Stutz](https://github.com/sttz)).
+1. Unity can**can be installed from command line**.
+2. Unity can **run editor tests from command line**.
+3. That is it.
 
-Then you just have to hook this up on [Travis CI](https://travis-ci.org/) (or any CI of your choice). See [`.travis.yml`](.travis.yml) below, and [`.scripts/test.command`](.scripts/test.command) for more.
+See installation details at [Downloading and installing Unity](https://docs.unity3d.com/Manual/InstallingUnity.html), or even better use [`install-unity`](https://github.com/sttz/install-unity) by [Adrian Stutz](https://github.com/sttz)). More on editor test runner at [Unity Test Runner](https://docs.unity3d.com/Manual/testing-editortestsrunner.html), and [Command line arguments](https://docs.unity3d.com/Manual/CommandLineArguments.html)).
+
+Then you just have to hook this up on [Travis CI](https://travis-ci.org/) (or any CI of your choice). See [`.travis.yml`](.travis.yml) below, and [`.scripts/test`](.scripts/test) for more (I added a step to output test results within).
+
+```
+os: osx
+language: generic
+install:  
+  - sudo python .scripts/install-unity.py --package Unity 5.6.2f1
+script:
+  - .scripts/test $TRAVIS_BUILD_DIR eppz.TestResult.xml
+```
 
 ## License
 
