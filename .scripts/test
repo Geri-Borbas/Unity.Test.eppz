@@ -21,7 +21,7 @@ echo ""
 python \
 .scripts/xml-to-json.py \
 -t xml2json \
-eppz.TestResult.xml \
+"$RESULTS_FILENAME" \
 --pretty \
 --strip_text \
 | sed -e $'s/"@/"/g'
