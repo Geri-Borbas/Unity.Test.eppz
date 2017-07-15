@@ -8,11 +8,11 @@ Unity Test project for [**Unity.Library.eppz**](https://github.com/eppz/Unity.Li
 2. You can **run Unity Editor Tests from command line**.
 3. That is it.
 
-See installation details at [Downloading and installing Unity](https://docs.unity3d.com/Manual/InstallingUnity.html), or even better use [`install-unity`](https://github.com/sttz/install-unity) by [Adrian Stutz](https://github.com/sttz)). More on editor test runner at [Unity Test Runner](https://docs.unity3d.com/Manual/testing-editortestsrunner.html), and [Command line arguments](https://docs.unity3d.com/Manual/CommandLineArguments.html)).
+See installation details at [Downloading and installing Unity](https://docs.unity3d.com/Manual/InstallingUnity.html), or even better use [`install-unity`](https://github.com/sttz/install-unity) by [Adrian Stutz](https://github.com/sttz). More on editor test runner at [Unity Test Runner](https://docs.unity3d.com/Manual/testing-editortestsrunner.html), and [Command line arguments](https://docs.unity3d.com/Manual/CommandLineArguments.html).
 
 ## Setup on Travis CI
 
-You just have to hook up the above on [Travis CI](https://travis-ci.org/) (or any CI of your choice). See [`.travis.yml`](.travis.yml) below, and [`.scripts/test`](.scripts/test) for more (I added a step there to output test results).
+Having tests running inside Unity, you don't need to install any specific language. So just use `language: generic` on an `os: osx` environment (see [`.travis.yml`](.travis.yml) below). To run Unity tests, I wrapped up some tasks in a simple shell script at [`.scripts/test`](.scripts/test) (it has a step to convert and output test results as `JSON`).
 
 ```
 os: osx
