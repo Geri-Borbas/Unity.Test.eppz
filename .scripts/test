@@ -33,11 +33,11 @@ echo_red(){ echo "\e[91m$1\e[0m"; }
 echo_green(){ echo "\e[92m$1\e[0m"; }
 
 if [ $STATUS_CODE -eq 0 ];then
-echo_green "Editor tests passed."
-echo "Unity exited with status code $STATUS_CODE (see test results JSON below for details)."
+echo_green "✅ Editor tests passed."
+echo "Unity exited with status code $STATUS_CODE (see details below)."
 else
-echo_red "Editor tests failed."
-echo "Unity exited with status code $STATUS_CODE (see test results JSON below for details)."
+echo_red "❌ Editor tests failed."
+echo "Unity exited with status code $STATUS_CODE (see details below)."
 fi
 
 
