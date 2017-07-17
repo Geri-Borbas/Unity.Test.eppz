@@ -1,5 +1,11 @@
 # eppz!
 
+* 0.3.4
+
+	+ `.script/test` output
+		+ Exit with `Unity.app` exit code
+		+ Fold test results into `travis_fold:`
+
 * 0.2.6
 
 	+ `.script/test`
