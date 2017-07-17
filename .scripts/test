@@ -43,7 +43,7 @@ fi
 
 ## Output Unity Editor test results
 
-echo "travis_fold:start:$RESULTS_FILENAME.json"
+echo "travis_fold:start:editor_test_results"
 echo "$RESULTS_FILENAME.json"
 
 python \
@@ -54,7 +54,7 @@ python \
 --strip_text \
 | sed -e $'s/"@/"/g'
 
-echo "travis_fold:end:$RESULTS_FILENAME.json"
+echo "travis_fold:end:editor_test_results"
 
 
 ## Exit with Unity.app status code
