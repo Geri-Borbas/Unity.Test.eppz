@@ -5,8 +5,12 @@ PROJECT_FOLDER="$1"
 RESULTS_FILENAME="$2"
 RESULTS_FILEPATH="$PROJECT_FOLDER/$RESULTS_FILENAME"
 
+
+## Run Unity Editor tests
+
+echo "travis_fold:start:editor_tests"
 echo "Testing Unity project: $PROJECT_FOLDER"
-echo "Running Unity.app (batch mode, run tests)..."
+echo "Running Unity.app..."
 
 "$UNITY_EXECUTABLE" \
 -projectPath "$PROJECT_FOLDER" \
@@ -20,23 +24,27 @@ STATUS_CODE=$?
 echo "Editor log: ~/Library/Logs/Unity/Editor.log"
 echo "Results xml: $RESULTS_FILEPATH"
 
-echo ""
+echo "travis_fold:end:editor_tests"
+
+
+## Quick summary
 
 echo_red(){ echo "\033[1;91m$1\033[0m"; }
 echo_green(){ echo "\033[1;92m$1\033[0m"; }
 
 if [ $STATUS_CODE -eq 0 ];then
 echo_green "Editor tests passed."
-echo "Unity exited with status code $STATUS_CODE (see test results JSON above for details)."
+echo "Unity exited with status code $STATUS_CODE (see test results JSON below for details)."
 else
 echo_red "Editor tests failed."
-echo "Unity exited with status code $STATUS_CODE (see test results JSON above for details)."
+echo "Unity exited with status code $STATUS_CODE (see test results JSON below for details)."
 fi
 
 
-## Output test results
+## Output Unity Editor test results
 
-echo "travis_fold:start:test_results"
+echo "travis_fold:start:$RESULTS_FILENAME.json"
+echo "$RESULTS_FILENAME.json"
 
 python \
 .scripts/xml-to-json.py \
@@ -46,7 +54,7 @@ python \
 --strip_text \
 | sed -e $'s/"@/"/g'
 
-echo "travis_fold:end:test_results"
+echo "travis_fold:end:$RESULTS_FILENAME.json"
 
 
 ## Exit with Unity.app status code
