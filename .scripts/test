@@ -29,8 +29,8 @@ echo "travis_fold:end:editor_tests"
 
 ## Quick summary
 
-echo_red(){ echo "\033[1;91m$1\033[0m"; }
-echo_green(){ echo "\033[1;92m$1\033[0m"; }
+echo_red(){ echo "\e[91m$1\e[0m"; }
+echo_green(){ echo "\e[92m$1\e[0m"; }
 
 if [ $STATUS_CODE -eq 0 ];then
 echo_green "Editor tests passed."
