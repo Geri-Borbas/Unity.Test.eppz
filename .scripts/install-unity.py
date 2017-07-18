@@ -514,7 +514,7 @@ def init_progress():
 def progress(blocknr, blocksize, size):
     global block_times, last_update
     
-    if time.time() - last_update > 0.5:
+    if time.time() - last_update > 30.0:
         last_update = time.time()
         
         window_duration = time.time() - block_times[0]
