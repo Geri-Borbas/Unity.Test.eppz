@@ -1,6 +1,6 @@
 os: osx
 language: generic
 install:  
-  - sudo python .scripts/install-unity.py --package Unity 2017.1.0f3
+  - sudo python .scripts/install-unity.py --package Unity 2017.1.1f1
 script:
   - .scripts/test $TRAVIS_BUILD_DIR eppz.TestResult.xml
