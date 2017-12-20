@@ -1,8 +1,9 @@
 os: osx
 language: generic
 before_install:
-  - export CFLAGS="-I/usr/local/opt/openssl/include $CFLAGS"
-  - export LDFLAGS="-L/usr/local/opt/openssl/lib $LDFLAGS"
+  - export CFLAGS="-I$(brew --prefix openssl)/include $CFLAGS"
+  - export LDFLAGS="-L$(brew --prefix openssl)/lib $LDFLAGS"
+  - pyenv install -v 3.4.3
 install:
   - sudo python .scripts/install-unity.py --package Unity 2017.1.1f1
 script:
