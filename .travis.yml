@@ -5,6 +5,7 @@ before_install:
   - export PATH="/usr/local/opt/openssl/bin:$PATH"
   - export LDFLAGS="$LDFLAGS -L/usr/local/opt/openssl/lib"
   - export CPPFLAGS="$CPPFLAGS -I/usr/local/opt/openssl/include"
+  - brew unlink openssl --force --overwrite python && brew link openssl --force --overwrite python
   - openssl version  
   - python -c 'import ssl; print ssl.OPENSSL_VERSION;'
 install:
