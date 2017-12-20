@@ -18,10 +18,12 @@ Having tests running inside Unity, you don't need to install any specific langua
 os: osx
 language: generic
 install:  
-  - sudo python .scripts/install-unity.py --package Unity 2017.1.0f3
+  - sudo python2 .scripts/install-unity.py --package Unity 2017.1.0f3
 script:
   - .scripts/test $TRAVIS_BUILD_DIR eppz.TestResult.xml
 ```
+
+> Please note that in order to pick up appropriate [OpenSSL](https://www.openssl.org/) version, [`install-unity`](https://github.com/sttz/install-unity) has to be run via `python2` instead of `python`.
 
 ## License
 
