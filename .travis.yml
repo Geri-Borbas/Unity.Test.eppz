@@ -8,7 +8,7 @@ before_install:
   - brew link openssl --force
   - openssl version
   - python -c 'import ssl; print ssl.OPENSSL_VERSION;'
-  - brew rm python
+  - brew uninstall --ignore-dependencies python
   - brew install python --with-brewed-openssl
   - openssl version
   - python -c 'import ssl; print ssl.OPENSSL_VERSION;'
