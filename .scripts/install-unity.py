@@ -46,7 +46,7 @@ import ssl
 
 # ---- CONFIGURATION ----
 
-VERSION = '0.0.9'
+VERSION = '0.1.1'
 
 # URL to look for main Unity releases
 UNITY_DOWNLOADS = 'https://unity3d.com/get-unity/download/archive'
@@ -54,6 +54,10 @@ UNITY_DOWNLOADS = 'https://unity3d.com/get-unity/download/archive'
 UNITY_PATCHES = 'https://unity3d.com/unity/qa/patch-releases'
 # URL to look for beta releases
 UNITY_BETAS = 'https://unity3d.com/unity/beta/archive'
+# URL for Unity patch release notes
+UNITY_PATCH_RELEASE_NOTES = 'https://unity3d.com/unity/qa/patch-releases/%s'
+# URL for Unity beta release notes
+UNITY_BETA_RELEASE_NOTES = 'https://unity3d.com/unity/beta/unity%s'
 # Regex to find relative beta page URI from HTML
 UNITY_BETAVERSION_RE = '"/unity/beta/unity(\d+\.\d+\.\d+\w\d+)"'
 # parametrized beta version URL, given its version
@@ -66,11 +70,6 @@ UNITY_INI_NAME = 'unity-%s-osx.ini'
 # Regex to parse URLs given to --discover
 UNITY_INI_RE = '(https?:\/\/[\w\/.-]+\/[0-9a-f]{12}\/)[\w\/.-]+-(\d+\.\d+\.\d+\w\d+)[\w\/.-]+'
 
-# Name of the Unity versions cache (created from above URLs)
-CACHE_FILE = 'unity_versions.json'
-# Lifetime of the cache, use --update to force an update
-CACHE_LIFETIME = 60*60*24
-
 # Regex to parse Unity versions in the format of e.g. '5.3.2p3'"
 VERSION_RE = '^(\d+)?(?:\.(\d+)(?:\.(\d+))?)?(?:(\w)(?:(\d+))?)?$'
 # Unity release types and corresponding letters in version string
@@ -82,11 +81,16 @@ RELEASE_LETTER_SORT = { 'p': 4, 'f': 3, 'b': 2, 'a': 1 }
 # Default release stage when not explicitly specified with --list or in the given version string
 DEFAULT_STAGE = 'f'
 
-# Default location where downloaded packages are temporarily stored
-# (Unless --download, --install or --keep is used, in which case they are not removed)
-DOWNLOAD_PATH = '~/Downloads/'
-# Name of top directory packages are stored (in subdirectories by version)
-DOWNLOAD_DIRECTORY = 'Unity Packages'
+# Default location where script data is being stored
+# (install packages, unity ini files, cache and settings)
+DATA_DIR = '~/Library/Application Support/install-unity/'
+# Name of the Unity versions cache in DATA_DIR (created from above URLs)
+CACHE_FILE = 'cache.json'
+# Lifetime of the cache, use --update to force an update
+CACHE_LIFETIME = 60*60*24
+# File where script settings are stored in DATA_DIR
+SETTINGS_FILE = 'settings.json'
+
 # Timeout of download requests in seconds
 DOWNLOAD_TIMEOUT = 60
 # How often downloads are retried when errors occur before giving up
@@ -124,12 +128,13 @@ parser.add_argument('-p', '--package',
 parser.add_argument('--all-packages', 
     action='store_true',
     help='install all packages instead of only the default ones when no packages are selected')
-parser.add_argument('--package-store', 
-    action='store',
-    help='location where the downloaded packages are stored (temporarily, if not --download or --keep)')
 parser.add_argument('-k', '--keep', 
     action='store_true',
-    help='don\'t remove installer files after installation (implied when using --install)')
+    help='don\'t remove downloaded packages after installation (implied when using --install)')
+parser.add_argument('--data-dir', 
+    action='store',
+    default=DATA_DIR,
+    help='directory to store packages, unity ini files, cache and settings (default is in Application Support)')
 
 parser.add_argument('-u', '--update', 
     action='store_true',
@@ -168,9 +173,8 @@ def error(message):
 # ---- VERSIONS CACHE ----
 
 class version_cache:
-    def __init__(self, cache_path):
-        self.cache_path = cache_path
-        self.cache_file = os.path.join(cache_path, CACHE_FILE)
+    def __init__(self, cache_file):
+        self.cache_file = cache_file
         
         self.cache = {}
         self.sorted_versions = None
@@ -240,11 +244,14 @@ class version_cache:
 
         return len(result)
 
-    def _load_and_parse(self, url, pattern, unity_versions):
+    def _load_and_parse(self, url, pattern, unity_versions, fail = True):
         try:
             response = urllib2.urlopen(url)
         except Exception as e:
-            error('Could not load URL "%s": %s' % (url, e.reason))
+            if fail:
+                error('Could not load URL "%s": %s' % (url, e.reason))
+            else:
+                return 0
         
         result = re.findall(pattern, response.read())
         for match in result:
@@ -256,6 +263,33 @@ class version_cache:
             data = json.dumps(self.cache)
             file.write(data)
     
+    def autoadd(self, version):
+        parsed = parse_version(version)
+
+        # We need a full version to look up the release notes
+        if None in parsed:
+            return False
+
+        url = None
+        cache = None
+        if parsed[3] == 'p':
+            url = UNITY_PATCH_RELEASE_NOTES % version_string(parsed)
+            cache = 'patch'
+        elif parsed[3] == 'b':
+            url = UNITY_BETA_RELEASE_NOTES % version_string(parsed)
+            cache = 'beta'
+        else:
+            return False
+
+        print 'Unity version %s not known, trying to guess release notes URL to find it...' % version
+        
+        count = self._load_and_parse(url, UNITY_DOWNLOADS_RE, self.cache[cache], False)
+        if count > 0:
+            self.save()
+            self.sorted_versions = None
+
+        return count > 0
+
     def add(self, url):
         result = re.search(UNITY_INI_RE, url)
         if result is None:
@@ -358,16 +392,45 @@ class version_cache:
                 last_major_minor = major_minor
             print '- %s' % version
     
+    def migrate_default_packages(self):
+        if "default_packages" in self.cache:
+            packages = self.cache["default_packages"]
+            del self.cache["default_packages"]
+            return packages
+        else:
+            return None
+
+# ---- SETTINGS ----
+
+class script_settings:
+    def __init__(self, settings_file):
+        self.settings_file = settings_file
+        self.settings = {}
+        self.load()
+    
+    def load(self):
+        if not os.path.isfile(self.settings_file):
+            return
+        
+        with open(self.settings_file, 'r') as file:
+            data = file.read()
+            self.settings = json.loads(data)
+    
+    def save(self):
+        with open(self.settings_file, 'w') as file:
+            data = json.dumps(self.settings)
+            file.write(data)
+    
     def set_default_packages(self, list):
         if list and len(list) > 0:
-            self.cache["default_packages"] = list
+            self.settings["default_packages"] = list
         else:
-            del self.cache["default_packages"]
+            del self.settings["default_packages"]
         self.save()
     
-    def default_packages(self):
-        if "default_packages" in self.cache:
-            return self.cache["default_packages"]
+    def get_default_packages(self):
+        if "default_packages" in self.settings:
+            return self.settings["default_packages"]
         else:
             return []
 
@@ -431,8 +494,8 @@ def select_version(version, sorted_versions):
             else:
                 print 'Selected version %s exactly matches input version' % (sorted_versions[i])
             return sorted_versions[i]
-    
-    error('Could not find a Unity version that matches "%s"' % version_string(input_version))
+
+    return None
 
 # ---- DOWNLOAD ----
 
@@ -514,7 +577,7 @@ def init_progress():
 def progress(blocknr, blocksize, size):
     global block_times, last_update
     
-    if time.time() - last_update > 30.0:
+    if time.time() - last_update > 0.5:
         last_update = time.time()
         
         window_duration = time.time() - block_times[0]
@@ -562,16 +625,20 @@ def load_ini(version):
     if not baseurl:
         error('Version %s is now a known Unity version' % version)
     
+    ini_dir = os.path.join(data_path, version)
     ini_name = UNITY_INI_NAME % version
-    ini_path = os.path.join(script_dir, ini_name)
+    ini_path = os.path.join(ini_dir, ini_name)
     
-    if not os.path.isfile(ini_path):
+    if args.update or not os.path.isfile(ini_path):
         url = baseurl + ini_name
         try:
             response = urllib2.urlopen(url)
         except Exception as e:
             error('Could not load URL "%s": %s' % (url, e.reason))
     
+        if not os.path.isdir(ini_dir):
+            os.makedirs(ini_dir)
+
         with open(ini_path, 'w') as file:
             file.write(response.read())
     
@@ -579,7 +646,7 @@ def load_ini(version):
     config.read(ini_path)
     return config
 
-def select_packages(config, packages):
+def select_packages(version, config, packages):
     available = config.sections()
     
     if len(packages) == 0:
@@ -640,7 +707,7 @@ def download(version, path, config, selected):
 
 # ---- INSTALL ----
 
-def find_unity_installs():
+def find_unity_installs(silent = False):
     installs = {}
     
     app_dir = os.path.join(args.volume, 'Applications')
@@ -658,19 +725,20 @@ def find_unity_installs():
         
         installs[installed_version] = os.path.join(app_dir, install_name)
     
-    if len(installs) == 0:
-        print "No existing Unity installations found."
-    else:
-        print 'Found %d existing Unity installations:' % len(installs)
-        for install in installs:
-            print '- %s (%s)' % (install, installs[install])
-    print ''
+    if not silent:
+        if len(installs) == 0:
+            print "No existing Unity installations found."
+        else:
+            print 'Found %d existing Unity installations:' % len(installs)
+            for install in installs:
+                print '- %s (%s)' % (install, installs[install])
+        print ''
     
     return installs
 
 def check_root():
     global pwd
-    if not is_root and (not args.operation or args.operation == 'install'):
+    if not pwd and not is_root and (not args.operation or args.operation == 'install'):
         # Get the root password early so we don't need to ask for it
         # after the downloads potentially took a long time to finish.
         # Also, just calling sudo might expire when the install takes
@@ -769,8 +837,7 @@ def install(version, path, config, selected, installs):
 def clean_up(path):
     # Prevent cleanup if there are unexpected files in the download directory
     for file in os.listdir(path):
-        file_lower = file.lower()
-        if not file_lower.endswith('.pkg') and not file == '.DS_Store':
+        if not os.path.splitext(file)[1].lower() in ['.pkg', '.ini'] and not file == '.DS_Store':
             print 'WARNING: Cleanup aborted because of unkown file "%s" in "%s"' % (file, path)
             return
     
@@ -786,13 +853,14 @@ def clean_up(path):
 
 # ---- MAIN ----
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-cache = version_cache(script_dir)
+data_path = os.path.abspath(os.path.expanduser(args.data_dir))
+cache = version_cache(os.path.join(data_path, CACHE_FILE))
+settings = script_settings(os.path.join(data_path, SETTINGS_FILE))
 pwd = None
 is_root = (os.getuid() == 0)
 
 def main():
-    print 'Install Unity Script %s\n' % VERSION
+    print 'Install Unity Script %s' % VERSION
 
     operation = args.operation
     packages = [x.lower() for x in args.package] if args.package else []
@@ -803,34 +871,32 @@ def main():
     # macOS has deprecated OpenSSL in favor of its own crypto libraries, which
     # means macOS will be stuck at OpenSSL 0.9.8, which doesn't support TLS1.2.
     match = re.match('OpenSSL (\d+).(\d+).(\d+)(\w+)', ssl.OPENSSL_VERSION)
-    if not match:
-        print 'ERROR: Could not parse OpenSSL version: %s' % version
-        sys.exit(1)
-
-    parts = match.groups()
-    if (int(parts[0]) < 1 or int(parts[1]) < 0 or int(parts[2]) < 1):
-        print (
-            'ERROR: Your Python\'s OpenSSL library is outdated (%s).\n'
-            'At least OpenSSL version 1.0.1g is required.\n'
-            'You need to install a new version of Python 2 with an updated OpenSSL library.\n'
-            ) % (ssl.OPENSSL_VERSION)
-        
-        brew_check = os.system('brew help &> /dev/null')
-        if brew_check != 0:
-            print 'Either download it from www.python.org or install it using a package manager like Homebrew.'
-        else:
+    if match:
+        parts = match.groups()
+        if (int(parts[0]) < 1 or int(parts[1]) < 0 or int(parts[2]) < 1):
             print (
-                'You can install python with Homebrew using the following command:\n'
-                'brew install python'
-            )
+                'ERROR: Your Python\'s OpenSSL library is outdated (%s).\n'
+                'At least OpenSSL version 1.0.1g is required.\n'
+                'You need to install a new version of Python 2 with an updated OpenSSL library.\n'
+                ) % (ssl.OPENSSL_VERSION)
+            
+            brew_check = os.system('brew help &> /dev/null')
+            if brew_check != 0:
+                print 'Either download it from www.python.org or install it using a package manager like Homebrew.'
+            else:
+                print (
+                    'You can install python with Homebrew using the following command:\n'
+                    'brew install python'
+                )
 
-        sys.exit(1)
+            sys.exit(1)
 
-    # When --update is set we also clear all ini files to force re-downloading them
-    if args.update:
-        for file in os.listdir(script_dir):
-            if file.startswith("unity") and file.endswith(".ini"):
-                os.remove(os.path.join(script_dir, file))
+    # Make sure data_dir exists
+    if not os.path.isdir(data_path):
+        os.makedirs(data_path)
+
+    print 'Writing data to %s (use --data-dir to change)' % data_path
+    print ''
 
     # Handle adding and removing of versions
     if args.discover or args.forget:
@@ -849,12 +915,10 @@ def main():
     if args.list or len(args.versions) == 0:
         operation = 'list-versions'
 
-    # Download path
-    download_to = args.package_store
-    if not download_to:
-        download_to = DOWNLOAD_PATH
-
-    download_to = os.path.expanduser(os.path.join(download_to, DOWNLOAD_DIRECTORY))
+    # Legacy: Migrate default packages from cache to settings
+    legacy_default_packages = cache.migrate_default_packages()
+    if legacy_default_packages and len(settings.get_default_packages()) == 0:
+        settings.set_default_packages(legacy_default_packages)
 
     # Save default packages
     if args.save:
@@ -864,7 +928,7 @@ def main():
         else:
             print 'Clearing saved default packages'
             print ''
-        cache.set_default_packages(packages)
+        settings.set_default_packages(packages)
 
     # Main Operation
     if operation == 'list-versions':
@@ -898,7 +962,8 @@ def main():
         if args.update or operation != 'install':
             cache.update(stage, force = args.update)
 
-        if (not operation or operation == 'install') and len(packages) > 0 and not 'unity' in packages:
+        adding_packages = (not operation or operation == 'install') and len(packages) > 0 and not 'unity' in packages
+        if adding_packages:
             print 'Installing additional packages ("Unity" editor package not selected)'
             
             if len(sorted_installs) == 0:
@@ -910,7 +975,19 @@ def main():
             print 'Trying to select most recent known Unity version'
             version_list = cache.get_sorted_versions(stage)
         
-        versions = set([select_version(v, version_list) for v in args.versions])
+        versions = set()
+        for input_version in args.versions:
+            selected = select_version(input_version, version_list)
+            if not selected:
+                # Try to find version by guessing the release notes url
+                if not adding_packages and cache.autoadd(input_version):
+                    # Try to re-select version with the updated cache
+                    version_list = cache.get_sorted_versions(stage)
+                    selected = select_version(input_version, version_list)
+                if not selected:
+                    error('Could not find a Unity version that matches "%s"' % input_version)
+            versions.add(selected)
+        
         print ''
 
         for version in versions:
@@ -926,16 +1003,16 @@ def main():
                     )
                 print ''
             else:
-                path = os.path.expanduser(os.path.join(download_to, version))
+                path = os.path.expanduser(os.path.join(data_path, version))
                 
                 print 'Processing packages for Unity version %s:' % version
                 
                 if len(packages) == 0 and not args.unity_defaults:
-                    packages = cache.default_packages()
+                    packages = settings.get_default_packages()
                     if len(packages) > 0:
                         print 'Using saved default packages'
                 
-                selected = select_packages(config, packages)
+                selected = select_packages(version, config, packages)
                 if len(selected) == 0:
                     print 'WARNING: No packages selected for version %s' % version
                     continue
@@ -964,6 +1041,7 @@ def main():
                 
                 if operation == 'install' or not operation:
                     install(version, path, config, selected, installs)
+                    installs = find_unity_installs(True)
                     
                     if not args.keep and not operation:
                         clean_up(path)
