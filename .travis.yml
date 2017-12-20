@@ -2,6 +2,10 @@ os: osx
 osx_image: xcode9.2
 language: generic
 before_install:
+before_install:
+  - brew update
+  - brew install python
+  - sudo python -m ensurepip
   - openssl version  
   - python -c 'import ssl; print ssl.OPENSSL_VERSION;'
 install:
