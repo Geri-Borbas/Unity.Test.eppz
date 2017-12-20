@@ -1,8 +1,7 @@
 os: osx
 language: generic
 before_install:
-  - export CFLAGS="-I$(brew --prefix openssl)/include $CFLAGS"
-  - export LDFLAGS="-L$(brew --prefix openssl)/lib $LDFLAGS"
+  - 'if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export CFLAGS="-I/usr/local/opt/openssl/include $CFLAGS" LDFLAGS="-L/usr/local/opt/openssl/lib $LDFLAGS"; fi'
 install:
   - sudo python .scripts/install-unity.py --package Unity 2017.1.1f1
 script:
