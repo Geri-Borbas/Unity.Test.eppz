@@ -7,8 +7,8 @@ before_install:
   - brew install python
   - sudo python -m ensurepip
   - openssl version  
-  - python -c 'import ssl; print ssl.OPENSSL_VERSION;'
+  - python2 -c 'import ssl; print ssl.OPENSSL_VERSION;'
 install:
-  - sudo python .scripts/install-unity.py --package Unity 2017.1.1f1
+  - sudo python2 .scripts/install-unity.py --package Unity 2017.1.1f1
 script:
   - .scripts/test $TRAVIS_BUILD_DIR eppz.TestResult.xml
