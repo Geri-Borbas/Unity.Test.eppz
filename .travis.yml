@@ -1,10 +1,7 @@
 os: osx
 language: generic
-python:
-  - 2.7
-install:  
-  - brew install openssl
-  - brew link --force openssl
+install:
+  - brew install python --with-brewed-openssl
   - sudo python .scripts/install-unity.py --package Unity 2017.1.1f1
 script:
   - .scripts/test $TRAVIS_BUILD_DIR eppz.TestResult.xml
