@@ -1,7 +1,17 @@
 os: osx
 language: generic
 before_install:
-  - pip2 install pyOpenSSL --upgrade
+  - openssl version
+  - python -c 'import ssl; print ssl.OPENSSL_VERSION;'
+  - brew update
+  - brew install openssl
+  - brew link openssl --force
+  - openssl version
+  - python -c 'import ssl; print ssl.OPENSSL_VERSION;'
+  - brew rm python
+  - brew install python --with-brewed-openssl
+  - openssl version
+  - python -c 'import ssl; print ssl.OPENSSL_VERSION;'
 install:
   - sudo python .scripts/install-unity.py --package Unity 2017.1.1f1
 script:
