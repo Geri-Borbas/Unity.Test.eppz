@@ -1,7 +1,5 @@
 os: osx
-osx_image: xcode9.2
 language: generic
-before_install:
 before_install:
   - openssl version  
   - python2 -c 'import ssl; print ssl.OPENSSL_VERSION;'
