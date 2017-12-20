@@ -1,19 +1,11 @@
 os: osx
 language: generic
 before_install:
-  - openssl version
-  - python -c 'import ssl; print ssl.OPENSSL_VERSION;'
-  - brew update
-  - brew install openssl
-  - brew link openssl --force
-  - openssl version
-  - python -c 'import ssl; print ssl.OPENSSL_VERSION;'
-  - brew upgrade openssl 
-  - openssl version
-  - python -c 'import ssl; print ssl.OPENSSL_VERSION;'
-  - brew uninstall --ignore-dependencies python
-  - brew install python --with-brewed-openssl
-  - openssl version
+  - brew upgrade openssl
+  - export PATH="/usr/local/opt/openssl/bin:$PATH"
+  - export LDFLAGS="$LDFLAGS -L/usr/local/opt/openssl/lib"
+  - export CPPFLAGS="$CPPFLAGS -I/usr/local/opt/openssl/include"
+  - openssl version  
   - python -c 'import ssl; print ssl.OPENSSL_VERSION;'
 install:
   - sudo python .scripts/install-unity.py --package Unity 2017.1.1f1
