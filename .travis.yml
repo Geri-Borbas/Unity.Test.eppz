@@ -3,8 +3,8 @@ language: generic
 cache:
   directories:
   - /Applications/Unity
-install:
-  - rmdir /Applications/Unity || true
-  - sudo python2 .scripts/install-unity.py --package Unity 2017.1.1f1
+# install:
+#   - rmdir /Applications/Unity || true
+#   - sudo python2 .scripts/install-unity.py --package Unity 2017.1.1f1
 script:
   - .scripts/test $TRAVIS_BUILD_DIR eppz.TestResult.xml
