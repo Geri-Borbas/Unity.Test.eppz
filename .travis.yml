@@ -5,6 +5,7 @@ cache:
   directories:
   - /Applications/Unity
 install:
-  - sudo python2 .scripts/install-unity.py --package Unity 2017.1.1f1
+##  Unity installer is suspended (it has uploaded to Travis cahce on first run).
+##  - sudo python2 .scripts/install-unity.py --package Unity 2017.1.1f1
 script:
   - .scripts/test $TRAVIS_BUILD_DIR eppz.TestResult.xml
