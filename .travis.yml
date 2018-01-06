@@ -1,7 +1,7 @@
 os: osx
 language: generic
 cache:
-  timeout: 900
+  timeout: 1000
   directories:
     - /Applications/Unity
 install:
