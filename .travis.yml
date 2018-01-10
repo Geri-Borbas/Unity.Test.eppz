@@ -1,12 +1,12 @@
 os: osx
 language: generic
-cache:
-  timeout: 900
-  directories:
-    - /Applications/Unity
+# cache:
+#   timeout: 900
+#   directories:
+#     - /Applications/Unity
 install:
   - sudo python2 .scripts/install-unity.py --package Unity 2017.1.1f1
-before_script:
-  - sudo chmod -R a+rwx /Applications/Unity
+# before_script:
+#   - sudo chmod -R a+rwx /Applications/Unity
 script:
   - .scripts/test $TRAVIS_BUILD_DIR eppz.TestResult.xml
