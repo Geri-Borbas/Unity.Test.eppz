@@ -35,6 +35,9 @@ echo "Unity exited with status code $STATUS_CODE (see details below)."
 else
 echo "❌ Editor tests failed."
 echo "Unity exited with status code $STATUS_CODE (see details below)."
+echo "travis_fold:start:editor_log"
+cat ~/Library/Logs/Unity/Editor.log
+echo "travis_fold:end:editor_log"
 fi
 
 
