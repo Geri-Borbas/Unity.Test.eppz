@@ -3,6 +3,7 @@ Library/
 Temp/
 obj/
 Build/
+Builds/
 sysinfo.txt
 *.csproj
 *.unityproj

@@ -6,5 +6,5 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Test.unity
-    guid: 00000000000000000000000000000000
+    path: Assets/Plugins/eppz!/DeepLink/Scenes/DeepLink.unity
+    guid: 310bde8e3f62b436fb17054a67fa3864
