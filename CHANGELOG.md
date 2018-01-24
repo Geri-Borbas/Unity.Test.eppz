@@ -1,5 +1,9 @@
 # eppz!
 
+* 0.7.2
+
+	+ Unity installation to `2017.2.1f1`
+
 * 0.3.4
 
 	+ `.script/test` output
